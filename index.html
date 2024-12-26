@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Language Code Editor</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: space-between;
+            padding: 20px;
+            flex-wrap: wrap;
+            color: rgb(0, 0, 0);
+            background-color:;
+        }
+        .editor, .preview {
+            width: 100%;
+            margin-bottom: 20px;
+            margin-left: 50px;
+            
+        }
+        textarea {
+            width: 100%;
+            height: 300px;
+            font-family: monospace;
+            padding: 10px;
+            border: 1px solid #0e0076;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        select, button {
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        button {
+            background-color: #0e0076;
+            color: white;
+            border: none;
+            cursor: pointer;
+            
+        }
+        button:hover {
+            background-color: #026d88;
+        }
+
+        #output, .preview {
+            width: 100%; /* Ensures it takes up full width of parent */
+            height: 100%;
+            white-space: pre-wrap; /* Ensures long lines wrap inside the container */
+            word-wrap: break-word; /* Breaks long words to avoid overflow */
+            font-family: monospace;
+            font-size: 16px;
+            padding: 10px;
+            background-color: #f4f4f4;
+            border-radius: 4px;
+            overflow-x: auto; /* Allows horizontal scrolling if needed */
+        }
+    </style>
+</head>
+<body>
+    <div class="editor">
+        <h2>Code Editor</h2>
+        <select id="languageSelector">
+            <option value="html">HTML</option>
+            <option value="css">CSS</option>
+            <option value="js">JavaScript</option>
+            <option value="python">Python</option>
+            <option value="c">C</option>
+            <option value="cpp">C++</option>
+            <option value="java">Java</option>
+        </select>
+        <textarea id="codeInput" placeholder="Write your code here..."></textarea>
+        <button onclick="runCode()">Run Code</button>
+    </div>
+
+    <div class="preview">
+        <h2>Output</h2>
+        <pre id="output"></pre>
+    </div>
+
+    <script>
+        async function runCode() {
+            const language = document.getElementById('languageSelector').value;
+            const code = document.getElementById('codeInput').value;
+            const output = document.getElementById('output');
+
+            if (language === 'html' || language === 'css' || language === 'js') {
+                // For HTML, CSS, and JavaScript, we can display the result directly
+                if (language === 'html') {
+                    const iframe = document.createElement('iframe');
+                    document.body.appendChild(iframe);
+                    const doc = iframe.contentDocument || iframe.contentWindow.document;
+                    doc.open();
+                    doc.write(code);
+                    doc.close();
+                } else if (language === 'css') {
+                    const iframe = document.createElement('iframe');
+                    document.body.appendChild(iframe);
+                    const doc = iframe.contentDocument || iframe.contentWindow.document;
+                    doc.open();
+                    doc.write('<style>' + code + '</style>');
+                    doc.close();
+                } else if (language === 'js') {
+                    const iframe = document.createElement('iframe');
+                    document.body.appendChild(iframe);
+                    const doc = iframe.contentDocument || iframe.contentWindow.document;
+                    doc.open();
+                    doc.write('<script>' + code + '<\/script>');
+                    doc.close();
+                }
+            } else {
+                // For other languages, send the code to the backend for execution
+                const response = await fetch('http://127.0.0.1:5000/execute', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ language, code })
+                });
+                const result = await response.json();
+                output.textContent = result.output;
+            }
+        }
+        
+    </script>
+</body>
+</html>
